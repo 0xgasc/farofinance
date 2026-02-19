@@ -1,58 +1,63 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { Info, X, Upload, Plug } from 'lucide-react';
+import { Upload, Plug, FlaskConical, Database } from 'lucide-react';
 import { useNavigationStore } from '@/lib/stores/navigationStore';
+import { useDataModeStore } from '@/lib/stores/dataModeStore';
 
 interface Props {
   onOpenImporter: () => void;
 }
 
 export default function DemoBanner({ onOpenImporter }: Props) {
-  const { data: session } = useSession();
-  const [visible, setVisible] = useState(false);
   const setActiveView = useNavigationStore((s) => s.setActiveView);
+  const { demoMode, setDemoMode } = useDataModeStore();
 
-  const storageKey = session?.user?.id ? `faro_demo_banner_${session.user.id}` : null;
-
-  useEffect(() => {
-    if (!storageKey) return;
-    const dismissed = localStorage.getItem(storageKey);
-    if (!dismissed) setVisible(true);
-  }, [storageKey]);
-
-  const dismiss = () => {
-    if (storageKey) localStorage.setItem(storageKey, '1');
-    setVisible(false);
-  };
-
-  if (!visible) return null;
+  if (!demoMode) {
+    // Live mode indicator — slim, unobtrusive
+    return (
+      <div className="bg-green-50 border-b border-green-100 px-4 py-2 flex items-center gap-3 text-xs">
+        <Database size={13} className="text-green-500 flex-shrink-0" />
+        <p className="text-green-700 flex-1">
+          <span className="font-medium">Live data mode.</span>{' '}
+          Showing your real data from imports and integrations.
+        </p>
+        <button
+          onClick={() => setDemoMode(true)}
+          className="text-green-600 hover:text-green-800 underline underline-offset-2"
+        >
+          Switch back to demo
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-blue-50 border-b border-blue-100 px-4 py-2.5 flex items-center gap-3 text-sm">
-      <Info size={15} className="text-blue-500 flex-shrink-0" />
-      <p className="text-blue-800 flex-1">
-        <span className="font-medium">You're viewing sample data.</span>{' '}
-        Import your own data or connect an integration to see real numbers.
+    <div className="bg-amber-50 border-b border-amber-100 px-4 py-2.5 flex items-center gap-3 text-sm">
+      <FlaskConical size={15} className="text-amber-500 flex-shrink-0" />
+      <p className="text-amber-900 flex-1">
+        <span className="font-medium">Sample data mode.</span>{' '}
+        Everything you see is demo data — none of it is saved.
       </p>
       <div className="flex items-center gap-2 flex-shrink-0">
         <button
           onClick={onOpenImporter}
-          className="flex items-center gap-1.5 text-xs font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 px-3 py-1.5 rounded-lg transition-colors"
+          className="flex items-center gap-1.5 text-xs font-medium text-amber-800 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-lg transition-colors"
         >
           <Upload size={13} />
           Import CSV
         </button>
         <button
-          onClick={() => { setActiveView('integrations'); dismiss(); }}
-          className="flex items-center gap-1.5 text-xs font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 px-3 py-1.5 rounded-lg transition-colors"
+          onClick={() => { setActiveView('integrations'); }}
+          className="flex items-center gap-1.5 text-xs font-medium text-amber-800 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-lg transition-colors"
         >
           <Plug size={13} />
           Connect
         </button>
-        <button onClick={dismiss} className="text-blue-400 hover:text-blue-600 ml-1">
-          <X size={15} />
+        <button
+          onClick={() => setDemoMode(false)}
+          className="flex items-center gap-1.5 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 px-3 py-1.5 rounded-lg transition-colors"
+        >
+          Use my data →
         </button>
       </div>
     </div>

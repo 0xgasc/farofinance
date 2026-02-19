@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ArrowUp, ArrowDown, TrendingUp, DollarSign, Users, Target } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowUp, ArrowDown, TrendingUp, DollarSign, Users, Target, FlaskConical } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { useDataModeStore } from '@/lib/stores/dataModeStore';
 
 export default function Dashboard() {
+  const { demoMode } = useDataModeStore();
   const [metrics, setMetrics] = useState({
     revenue: 1250000,
     revenueChange: 12.5,
@@ -62,6 +64,12 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {demoMode && (
+        <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 w-fit">
+          <FlaskConical size={13} />
+          Sample data — click <strong>"Use my data →"</strong> in the banner above to switch to your real numbers
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard
           title="Revenue"

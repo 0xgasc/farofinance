@@ -1,15 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { TrendingUp, TrendingDown, Minus, Filter, Download } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useState, useEffect } from 'react';
+import { TrendingUp, TrendingDown, Download, Upload, Loader2, BarChart2 } from 'lucide-react';
+import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts';
 import { downloadCSV } from '@/lib/utils/csvExport';
+import { useDataModeStore } from '@/lib/stores/dataModeStore';
+import { useMetricStore } from '@/lib/stores/metricStore';
+import CSVImporter from '@/components/CSVImporter';
 
-export default function MetricsView() {
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedPeriod, setSelectedPeriod] = useState('monthly');
-
-  const metrics = [
+const DEMO_METRICS = [
     {
       id: 1,
       name: 'Monthly Recurring Revenue',
@@ -78,7 +77,33 @@ export default function MetricsView() {
         { month: 'Jun', value: 125000 },
       ]
     }
-  ];
+];
+
+export default function MetricsView() {
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedPeriod, setSelectedPeriod] = useState('monthly');
+  const [importerOpen, setImporterOpen] = useState(false);
+
+  const { demoMode } = useDataModeStore();
+  const { metrics: liveMetrics, isLoading, fetchMetrics } = useMetricStore();
+
+  useEffect(() => {
+    if (!demoMode) fetchMetrics();
+  }, [demoMode]);
+
+  // Normalise live metrics to the same shape MetricCard expects
+  const normalisedLive = liveMetrics.map((m: any, i: number) => ({
+    id: m._id || i,
+    name: m.name,
+    category: m.category,
+    value: m.data?.[m.data.length - 1]?.value ?? 0,
+    change: 0,
+    target: m.target ?? 0,
+    unit: m.unit ?? '',
+    data: (m.data ?? []).map((d: any) => ({ month: d.date, value: d.value })),
+  }));
+
+  const metrics = demoMode ? DEMO_METRICS : normalisedLive;
 
   const categories = [
     { value: 'all', label: 'All Categories' },
@@ -170,13 +195,15 @@ export default function MetricsView() {
 
   return (
     <div className="space-y-6">
+      <CSVImporter isOpen={importerOpen} onClose={() => { setImporterOpen(false); if (!demoMode) fetchMetrics(); }} initialType="metrics" />
+
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Key Metrics</h2>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
           >
             {categories.map(cat => (
               <option key={cat.value} value={cat.value}>{cat.label}</option>
@@ -185,7 +212,7 @@ export default function MetricsView() {
           <select
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value)}
-            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
           >
             <option value="daily">Daily</option>
             <option value="weekly">Weekly</option>
@@ -193,16 +220,56 @@ export default function MetricsView() {
             <option value="quarterly">Quarterly</option>
           </select>
           <button
-            onClick={() => downloadCSV('faro-metrics', ['name', 'category', 'value', 'target', 'unit', 'change_%'],
-              filteredMetrics.map(m => [m.name, m.category, m.value, m.target, m.unit, m.change]))}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50"
+            onClick={() => setImporterOpen(true)}
+            className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-sm"
           >
-            <Download size={18} />
-            Export
+            <Upload size={15} />
+            Import
           </button>
+          {filteredMetrics.length > 0 && (
+            <button
+              onClick={() => downloadCSV('faro-metrics', ['name', 'category', 'value', 'target', 'unit'],
+                filteredMetrics.map(m => [m.name, m.category, m.value, m.target, m.unit]))}
+              className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-sm"
+            >
+              <Download size={15} />
+              Export
+            </button>
+          )}
         </div>
       </div>
 
+      {isLoading && !demoMode ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 size={24} className="animate-spin text-gray-300" />
+        </div>
+      ) : !demoMode && metrics.length === 0 ? (
+        <div className="bg-white rounded-xl border border-gray-200 p-16 text-center">
+          <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <BarChart2 size={26} className="text-gray-300" />
+          </div>
+          <h3 className="font-semibold text-gray-700 mb-1">No metrics yet</h3>
+          <p className="text-sm text-gray-400 mb-5 max-w-xs mx-auto">
+            Import a CSV with your KPIs to track progress toward targets.
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <button
+              onClick={() => setImporterOpen(true)}
+              className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90"
+            >
+              <Upload size={15} />
+              Import CSV
+            </button>
+            <button
+              onClick={() => useDataModeStore.getState().setDemoMode(true)}
+              className="text-sm text-gray-500 hover:text-gray-700 underline underline-offset-2"
+            >
+              View demo data
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {filteredMetrics.map(metric => (
           <MetricCard key={metric.id} metric={metric} />
@@ -250,6 +317,8 @@ export default function MetricsView() {
           </div>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }
