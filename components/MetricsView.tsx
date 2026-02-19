@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { TrendingUp, TrendingDown, Minus, Filter, Download } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { downloadCSV } from '@/lib/utils/csvExport';
 
 export default function MetricsView() {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -191,7 +192,11 @@ export default function MetricsView() {
             <option value="monthly">Monthly</option>
             <option value="quarterly">Quarterly</option>
           </select>
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">
+          <button
+            onClick={() => downloadCSV('faro-metrics', ['name', 'category', 'value', 'target', 'unit', 'change_%'],
+              filteredMetrics.map(m => [m.name, m.category, m.value, m.target, m.unit, m.change]))}
+            className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50"
+          >
             <Download size={18} />
             Export
           </button>

@@ -1,0 +1,9 @@
+period,customer,amount,type,product
+2024-01,Acme Corp,5000,new,Starter Plan
+2024-01,Beta Industries,12000,new,Growth Plan
+2024-01,Gamma Solutions,8500,expansion,Growth Plan
+2024-02,Delta Ventures,5000,new,Starter Plan
+2024-02,Epsilon Tech,15000,new,Scale Plan
+2024-02,Beta Industries,500,contraction,Growth Plan
+2024-03,Zeta Capital,5000,new,Starter Plan
+2024-03,Acme Corp,-5000,churn,Starter Plan

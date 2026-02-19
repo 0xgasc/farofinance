@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Edit2, Check, X } from 'lucide-react';
+import { Plus, Edit2, Check, X, Download, Upload } from 'lucide-react';
+import { downloadCSV } from '@/lib/utils/csvExport';
+import CSVImporter from '@/components/CSVImporter';
 
 export default function BudgetManager() {
   const [budgets, setBudgets] = useState([
@@ -45,6 +47,7 @@ export default function BudgetManager() {
 
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingBudget, setEditingBudget] = useState<any>(null);
+  const [importerOpen, setImporterOpen] = useState(false);
 
   const totalPlanned = budgets.reduce((sum, b) => sum + b.planned, 0);
   const totalActual = budgets.reduce((sum, b) => sum + b.actual, 0);
@@ -72,14 +75,37 @@ export default function BudgetManager() {
     return 'text-gray-600';
   };
 
+  const handleExport = () => {
+    downloadCSV('faro-budgets', ['category', 'subcategory', 'planned', 'actual', 'variance', 'period'],
+      budgets.map(b => [b.category, b.subcategory ?? '', b.planned, b.actual, b.actual - b.planned, b.period]));
+  };
+
   return (
     <div className="space-y-6">
+      <CSVImporter isOpen={importerOpen} onClose={() => setImporterOpen(false)} initialType="budgets" />
+
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Budget Management</h2>
-        <button className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90">
-          <Plus size={20} />
-          New Budget Item
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 border border-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50"
+          >
+            <Download size={16} />
+            Export
+          </button>
+          <button
+            onClick={() => setImporterOpen(true)}
+            className="flex items-center gap-2 border border-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50"
+          >
+            <Upload size={16} />
+            Import
+          </button>
+          <button className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90">
+            <Plus size={20} />
+            New Budget Item
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

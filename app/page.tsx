@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useNavigationStore } from '@/lib/stores/navigationStore';
 import Sidebar from '@/components/Sidebar';
@@ -22,11 +23,15 @@ import ReportBuilder from '@/components/ReportBuilder';
 import OrgSettings from '@/components/OrgSettings';
 import FeedbackWidget from '@/components/FeedbackWidget';
 import LandingPage from '@/components/LandingPage';
+import OnboardingModal from '@/components/OnboardingModal';
+import DemoBanner from '@/components/DemoBanner';
+import CSVImporter from '@/components/CSVImporter';
 import { Loader2 } from 'lucide-react';
 
 export default function Home() {
   const { data: session, status } = useSession();
   const activeView = useNavigationStore((s) => s.activeView);
+  const [importerOpen, setImporterOpen] = useState(false);
 
   if (status === 'loading') {
     return (
@@ -89,16 +94,29 @@ export default function Home() {
 
   return (
     <div className="flex h-screen bg-gray-50">
+      {/* Onboarding modal — fires once per user via localStorage */}
+      <OnboardingModal onOpenImporter={() => setImporterOpen(true)} />
+
+      {/* Global CSV importer modal */}
+      <CSVImporter isOpen={importerOpen} onClose={() => setImporterOpen(false)} />
+
       <Sidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="p-8">
-          <header className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">{current.title}</h1>
-            <p className="text-gray-600 mt-1">{current.description}</p>
-          </header>
-          {renderView()}
-        </div>
-      </main>
+
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Demo data banner */}
+        <DemoBanner onOpenImporter={() => setImporterOpen(true)} />
+
+        <main className="flex-1 overflow-auto">
+          <div className="p-8">
+            <header className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">{current.title}</h1>
+              <p className="text-gray-600 mt-1">{current.description}</p>
+            </header>
+            {renderView()}
+          </div>
+        </main>
+      </div>
+
       <FeedbackWidget />
     </div>
   );

@@ -7,6 +7,7 @@ export interface IOrganization extends Document {
   currency: string;
   fiscalYearEnd: string;
   industry?: string;
+  onboardingCompleted: boolean;
   settings: {
     defaultCurrency: string;
     dateFormat: string;
@@ -32,6 +33,7 @@ const OrganizationSchema = new Schema<IOrganization>({
   currency: { type: String, default: 'USD' },
   fiscalYearEnd: { type: String, default: '12-31' },
   industry: String,
+  onboardingCompleted: { type: Boolean, default: false },
   settings: {
     defaultCurrency: { type: String, default: 'USD' },
     dateFormat: { type: String, default: 'MM/DD/YYYY' },

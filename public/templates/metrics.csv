@@ -1,0 +1,9 @@
+name,category,value,target,unit
+Monthly Recurring Revenue,revenue,125000,150000,$
+Annual Recurring Revenue,revenue,1500000,1800000,$
+Customer Acquisition Cost,efficiency,2500,2000,$
+Lifetime Value,efficiency,75000,90000,$
+Net Promoter Score,customer,72,80,
+Churn Rate,customer,2.1,1.5,%
+Gross Margin,revenue,72,75,%
+Employee Productivity,operational,125000,130000,$/employee
