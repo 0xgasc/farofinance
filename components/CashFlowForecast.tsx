@@ -6,6 +6,7 @@ import {
   ResponsiveContainer, Legend, ReferenceLine
 } from 'recharts';
 import { Wallet, ArrowUpRight, ArrowDownRight, Edit3, Check } from 'lucide-react';
+import { useDataModeStore } from '@/lib/stores/dataModeStore';
 
 interface WeeklyData {
   week: string;
@@ -46,6 +47,7 @@ function generateWeeks(): WeeklyData[] {
 }
 
 export default function CashFlowForecast() {
+  const { demoMode } = useDataModeStore();
   const [weeks, setWeeks] = useState<WeeklyData[]>(generateWeeks);
   const [editingWeek, setEditingWeek] = useState<number | null>(null);
   const [editValues, setEditValues] = useState({ cashIn: '', cashOut: '' });
@@ -89,6 +91,25 @@ export default function CashFlowForecast() {
     if (Math.abs(n) >= 1000) return `$${(n / 1000).toFixed(0)}K`;
     return `$${n.toFixed(0)}`;
   };
+
+
+  if (!demoMode) return (
+    <div className="bg-white rounded-xl border border-gray-200 p-16 text-center">
+      <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <Wallet size={26} className="text-gray-300" />
+      </div>
+      <h3 className="font-semibold text-gray-700 mb-1">No live data yet</h3>
+      <p className="text-sm text-gray-400 mb-5 max-w-xs mx-auto">
+        Connect integrations or import CSVs to populate this view with your real numbers.
+      </p>
+      <button
+        onClick={() => useDataModeStore.getState().setDemoMode(true)}
+        className="text-sm text-primary hover:underline underline-offset-2"
+      >
+        ← View demo data
+      </button>
+    </div>
+  );
 
   return (
     <div className="space-y-6">

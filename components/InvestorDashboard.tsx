@@ -9,6 +9,7 @@ import {
   Eye, Share2, Lock, Link2, Copy, Check,
   TrendingUp, DollarSign, Users, Flame, Clock
 } from 'lucide-react';
+import { useDataModeStore } from '@/lib/stores/dataModeStore';
 
 const mrrData = [
   { month: 'Jul', mrr: 42000 }, { month: 'Aug', mrr: 49500 }, { month: 'Sep', mrr: 55000 },
@@ -24,6 +25,7 @@ const revenueVsBurn = [
 ];
 
 export default function InvestorDashboard() {
+  const { demoMode } = useDataModeStore();
   const [shareModal, setShareModal] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -49,6 +51,25 @@ export default function InvestorDashboard() {
     { label: 'Runway', value: '46 mo', change: 'Healthy', positive: true, icon: Clock, color: 'teal' },
     { label: 'Gross Margin', value: '72%', change: '+2pp MoM', positive: true, icon: TrendingUp, color: 'emerald' },
   ];
+
+
+  if (!demoMode) return (
+    <div className="bg-white rounded-xl border border-gray-200 p-16 text-center">
+      <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <Eye size={26} className="text-gray-300" />
+      </div>
+      <h3 className="font-semibold text-gray-700 mb-1">No live data yet</h3>
+      <p className="text-sm text-gray-400 mb-5 max-w-xs mx-auto">
+        Connect integrations or import CSVs to populate this view with your real numbers.
+      </p>
+      <button
+        onClick={() => useDataModeStore.getState().setDemoMode(true)}
+        className="text-sm text-primary hover:underline underline-offset-2"
+      >
+        ← View demo data
+      </button>
+    </div>
+  );
 
   return (
     <div className="space-y-6">

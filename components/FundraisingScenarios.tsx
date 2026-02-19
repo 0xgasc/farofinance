@@ -6,6 +6,7 @@ import {
   ResponsiveContainer, Legend
 } from 'recharts';
 import { Rocket, DollarSign, TrendingUp, Clock, Plus, Trash2 } from 'lucide-react';
+import { useDataModeStore } from '@/lib/stores/dataModeStore';
 
 interface Scenario {
   id: string;
@@ -67,6 +68,7 @@ const defaultScenarios: Scenario[] = [
 ];
 
 export default function FundraisingScenarios() {
+  const { demoMode } = useDataModeStore();
   const [scenarios, setScenarios] = useState<Scenario[]>(defaultScenarios);
   const [selected, setSelected] = useState<string>(defaultScenarios[0].id);
   const [showAdd, setShowAdd] = useState(false);
@@ -131,6 +133,25 @@ export default function FundraisingScenarios() {
     setScenarios(scenarios.filter((s) => s.id !== id));
     if (selected === id) setSelected(scenarios[0]?.id || '');
   };
+
+
+  if (!demoMode) return (
+    <div className="bg-white rounded-xl border border-gray-200 p-16 text-center">
+      <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <Rocket size={26} className="text-gray-300" />
+      </div>
+      <h3 className="font-semibold text-gray-700 mb-1">No live data yet</h3>
+      <p className="text-sm text-gray-400 mb-5 max-w-xs mx-auto">
+        Connect integrations or import CSVs to populate this view with your real numbers.
+      </p>
+      <button
+        onClick={() => useDataModeStore.getState().setDemoMode(true)}
+        className="text-sm text-primary hover:underline underline-offset-2"
+      >
+        ← View demo data
+      </button>
+    </div>
+  );
 
   return (
     <div className="space-y-6">

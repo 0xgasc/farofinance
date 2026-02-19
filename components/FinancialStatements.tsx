@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { FileSpreadsheet, Download, TrendingUp, TrendingDown } from 'lucide-react';
+import { useDataModeStore } from '@/lib/stores/dataModeStore';
 
 const plData = [
   { category: 'Revenue', q4_2025: 215000, q1_2026: 243000, change: 13.0 },
@@ -51,6 +52,7 @@ const cashFlow = [
 ];
 
 export default function FinancialStatements() {
+  const { demoMode } = useDataModeStore();
   const [activeTab, setActiveTab] = useState<'pl' | 'bs' | 'cf'>('pl');
 
   const fmt = (n: number) => {
@@ -65,6 +67,25 @@ export default function FinancialStatements() {
     { id: 'bs', label: 'Balance Sheet', icon: FileSpreadsheet },
     { id: 'cf', label: 'Cash Flow', icon: TrendingUp },
   ];
+
+
+  if (!demoMode) return (
+    <div className="bg-white rounded-xl border border-gray-200 p-16 text-center">
+      <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <FileSpreadsheet size={26} className="text-gray-300" />
+      </div>
+      <h3 className="font-semibold text-gray-700 mb-1">No live data yet</h3>
+      <p className="text-sm text-gray-400 mb-5 max-w-xs mx-auto">
+        Connect integrations or import CSVs to populate this view with your real numbers.
+      </p>
+      <button
+        onClick={() => useDataModeStore.getState().setDemoMode(true)}
+        className="text-sm text-primary hover:underline underline-offset-2"
+      >
+        ← View demo data
+      </button>
+    </div>
+  );
 
   return (
     <div className="space-y-6">

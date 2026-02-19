@@ -9,6 +9,7 @@ import {
   Flame, TrendingDown, Clock, DollarSign, Plus, Trash2,
   AlertTriangle, CheckCircle
 } from 'lucide-react';
+import { useDataModeStore } from '@/lib/stores/dataModeStore';
 
 interface CashEntry {
   id: string;
@@ -38,6 +39,7 @@ const defaultMonthlyData: ExpenseEntry[] = [
 ];
 
 export default function RunwayCalculator() {
+  const { demoMode } = useDataModeStore();
   const [cashEntries, setCashEntries] = useState<CashEntry[]>(defaultCashEntries);
   const [monthlyData, setMonthlyData] = useState<ExpenseEntry[]>(defaultMonthlyData);
   const [showAddCash, setShowAddCash] = useState(false);
@@ -102,6 +104,25 @@ export default function RunwayCalculator() {
 
   const runwayColor = runwayMonths > 18 ? 'text-green-600' : runwayMonths > 12 ? 'text-blue-600' : runwayMonths > 6 ? 'text-yellow-600' : 'text-red-600';
   const runwayBg = runwayMonths > 18 ? 'bg-green-50' : runwayMonths > 12 ? 'bg-blue-50' : runwayMonths > 6 ? 'bg-yellow-50' : 'bg-red-50';
+
+
+  if (!demoMode) return (
+    <div className="bg-white rounded-xl border border-gray-200 p-16 text-center">
+      <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <Flame size={26} className="text-gray-300" />
+      </div>
+      <h3 className="font-semibold text-gray-700 mb-1">No live data yet</h3>
+      <p className="text-sm text-gray-400 mb-5 max-w-xs mx-auto">
+        Connect integrations or import CSVs to populate this view with your real numbers.
+      </p>
+      <button
+        onClick={() => useDataModeStore.getState().setDemoMode(true)}
+        className="text-sm text-primary hover:underline underline-offset-2"
+      >
+        ← View demo data
+      </button>
+    </div>
+  );
 
   return (
     <div className="space-y-6">

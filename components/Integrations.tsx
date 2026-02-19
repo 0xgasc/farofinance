@@ -1,72 +1,89 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Settings, RefreshCw, Check, X, AlertCircle, Database, Users, CreditCard, BarChart3, Package } from 'lucide-react';
+import { useDataModeStore } from '@/lib/stores/dataModeStore';
+
+const DEMO_INTEGRATIONS = [
+  {
+    id: 1,
+    name: 'QuickBooks Online',
+    type: 'accounting',
+    provider: 'quickbooks',
+    status: 'connected',
+    lastSync: '2024-01-20 10:30 AM',
+    nextSync: '2024-01-21 10:30 AM',
+    recordsSynced: 1250,
+    entity: 'Main Company',
+    icon: '📊'
+  },
+  {
+    id: 2,
+    name: 'Salesforce CRM',
+    type: 'crm',
+    provider: 'salesforce',
+    status: 'connected',
+    lastSync: '2024-01-20 09:15 AM',
+    nextSync: '2024-01-20 10:15 AM',
+    recordsSynced: 3420,
+    entity: 'Main Company',
+    icon: '☁️'
+  },
+  {
+    id: 3,
+    name: 'Stripe Payments',
+    type: 'payment',
+    provider: 'stripe',
+    status: 'syncing',
+    lastSync: '2024-01-20 11:00 AM',
+    nextSync: 'In Progress',
+    recordsSynced: 890,
+    entity: 'US Subsidiary',
+    icon: '💳'
+  },
+  {
+    id: 4,
+    name: 'Gusto Payroll',
+    type: 'hris',
+    provider: 'gusto',
+    status: 'error',
+    lastSync: '2024-01-19 08:00 PM',
+    nextSync: 'Failed',
+    recordsSynced: 0,
+    entity: 'Main Company',
+    error: 'Authentication failed',
+    icon: '👥'
+  },
+  {
+    id: 5,
+    name: 'Xero Accounting',
+    type: 'accounting',
+    provider: 'xero',
+    status: 'disconnected',
+    lastSync: 'Never',
+    nextSync: '-',
+    recordsSynced: 0,
+    entity: 'EU Subsidiary',
+    icon: '📘'
+  }
+];
+
+const LIVE_INTEGRATIONS = DEMO_INTEGRATIONS.map(i => ({
+  ...i,
+  status: 'disconnected',
+  lastSync: 'Never',
+  nextSync: '-',
+  recordsSynced: 0,
+  error: undefined,
+}));
 
 export default function Integrations() {
-  const [integrations, setIntegrations] = useState([
-    {
-      id: 1,
-      name: 'QuickBooks Online',
-      type: 'accounting',
-      provider: 'quickbooks',
-      status: 'connected',
-      lastSync: '2024-01-20 10:30 AM',
-      nextSync: '2024-01-21 10:30 AM',
-      recordsSynced: 1250,
-      entity: 'Main Company',
-      icon: '📊'
-    },
-    {
-      id: 2,
-      name: 'Salesforce CRM',
-      type: 'crm',
-      provider: 'salesforce',
-      status: 'connected',
-      lastSync: '2024-01-20 09:15 AM',
-      nextSync: '2024-01-20 10:15 AM',
-      recordsSynced: 3420,
-      entity: 'Main Company',
-      icon: '☁️'
-    },
-    {
-      id: 3,
-      name: 'Stripe Payments',
-      type: 'payment',
-      provider: 'stripe',
-      status: 'syncing',
-      lastSync: '2024-01-20 11:00 AM',
-      nextSync: 'In Progress',
-      recordsSynced: 890,
-      entity: 'US Subsidiary',
-      icon: '💳'
-    },
-    {
-      id: 4,
-      name: 'Gusto Payroll',
-      type: 'hris',
-      provider: 'gusto',
-      status: 'error',
-      lastSync: '2024-01-19 08:00 PM',
-      nextSync: 'Failed',
-      recordsSynced: 0,
-      entity: 'Main Company',
-      error: 'Authentication failed',
-      icon: '👥'
-    },
-    {
-      id: 5,
-      name: 'Xero Accounting',
-      type: 'accounting',
-      provider: 'xero',
-      status: 'disconnected',
-      lastSync: 'Never',
-      nextSync: '-',
-      recordsSynced: 0,
-      entity: 'EU Subsidiary',
-      icon: '📘'
-    }
-  ]);
+  const { demoMode } = useDataModeStore();
+  const [integrations, setIntegrations] = useState(demoMode ? DEMO_INTEGRATIONS : LIVE_INTEGRATIONS);
+
+  useEffect(() => {
+    setIntegrations(demoMode ? DEMO_INTEGRATIONS : LIVE_INTEGRATIONS);
+  }, [demoMode]);
 
   const [selectedIntegration, setSelectedIntegration] = useState<any>(null);
   const [showAddModal, setShowAddModal] = useState(false);
