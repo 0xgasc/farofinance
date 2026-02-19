@@ -92,23 +92,15 @@ export default function CSVImporter({ isOpen, onClose, initialType = 'budgets' }
   const [result, setResult] = useState<{ imported: number; errors: string[] } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (!isOpen) return null;
-
-  const template = TEMPLATES[activeType];
-
-  const resetFile = () => {
+  // All hooks must be declared before any early return
+  const resetFile = useCallback(() => {
     setFile(null);
     setParsed(null);
     setParseError('');
     setResult(null);
-  };
+  }, []);
 
-  const handleTypeChange = (t: ImportType) => {
-    setActiveType(t);
-    resetFile();
-  };
-
-  const processFile = (f: File) => {
+  const processFile = useCallback((f: File) => {
     if (!f.name.endsWith('.csv') && f.type !== 'text/csv') {
       setParseError('Please upload a .csv file.');
       return;
@@ -127,14 +119,23 @@ export default function CSVImporter({ isOpen, onClose, initialType = 'budgets' }
       }
     };
     reader.readAsText(f);
-  };
+  }, []);
 
   const onDrop = useCallback((e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
     const f = e.dataTransfer.files[0];
     if (f) processFile(f);
-  }, []);
+  }, [processFile]);
+
+  if (!isOpen) return null;
+
+  const template = TEMPLATES[activeType];
+
+  const handleTypeChange = (t: ImportType) => {
+    setActiveType(t);
+    resetFile();
+  };
 
   const handleImport = async () => {
     if (!parsed) return;
